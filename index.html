@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart AI Health Guardian Band | Command Center</title>
+  <meta name="description" content="AI-powered emergency health monitoring wearable command center — real-time vitals, predictive analytics, and smart city emergency integration." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- App Shell -->
+  <div class="app-shell" id="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="8" width="36" height="24" rx="8" fill="url(#brandGrad)" />
+            <path d="M10 20 L14 14 L17 22 L21 10 L24 26 L27 18 L30 20" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <defs>
+              <linearGradient id="brandGrad" x1="2" y1="8" x2="38" y2="32" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#ec4899"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">HealthGuard AI</span>
+          <span class="brand-sub">v2.0 Command Center</span>
+        </div>
+      </div>
+
+      <div class="device-status-card">
+        <div class="device-dot" id="deviceDot"></div>
+        <div>
+          <div class="device-status-label">Band Connected</div>
+          <div class="device-id">ESP32-S3 · #HGB-2847</div>
+        </div>
+        <div class="battery-pill" id="batteryPill">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="3.5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/><rect x="11.5" y="5.5" width="1.5" height="3" rx="0.5" fill="currentColor"/><rect id="battFill" x="2.5" y="5" width="7" height="4" rx="0.8" fill="#22c55e"/></svg>
+          <span id="battPct">78%</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span>Live Dashboard</span>
+          <div class="live-badge">LIVE</div>
+        </button>
+        <button class="nav-item" id="nav-ai" onclick="switchTab('ai')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12h8M12 8v8"/></svg>
+          <span>AI Insights</span>
+        </button>
+        <button class="nav-item" id="nav-emergency" onclick="switchTab('emergency')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>Emergency</span>
+          <div class="alert-count" id="alertCount">0</div>
+        </button>
+        <button class="nav-item" id="nav-smartcity" onclick="switchTab('smartcity')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+          <span>Smart City</span>
+        </button>
+        <button class="nav-item" id="nav-analytics" onclick="switchTab('analytics')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span>Analytics</span>
+        </button>
+        <button class="nav-item" id="nav-settings" onclick="switchTab('settings')">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="patient-card">
+          <div class="patient-avatar">VR</div>
+          <div class="patient-info">
+            <div class="patient-name">Vignesh R.</div>
+            <div class="patient-meta">Age 34 · High Risk Profile</div>
+          </div>
+          <div class="status-ring" title="Status: Active Monitoring"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-btn" onclick="toggleSidebar()" id="menuBtn" aria-label="Toggle sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="page-title" id="pageTitle">Live Dashboard</div>
+        </div>
+        <div class="topbar-right">
+          <div class="time-display" id="timeDisplay"></div>
+          <div class="signal-bars">
+            <div class="bar b1"></div><div class="bar b2"></div><div class="bar b3"></div><div class="bar b4"></div>
+          </div>
+          <button class="panic-btn" id="panicBtn" onclick="triggerPanic()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            PANIC
+          </button>
+        </div>
+      </header>
+
+      <!-- Tab Pages -->
+      <div class="tab-content">
+
+        <!-- DASHBOARD TAB -->
+        <div class="tab-page active" id="tab-dashboard">
+          <div class="vitals-grid">
+            <!-- Heart Rate -->
+            <div class="vital-card" id="hrCard">
+              <div class="vital-header">
+                <div class="vital-label">
+                  <div class="vital-icon icon-hr">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                  </div>
+                  <span>Heart Rate</span>
+                </div>
+                <span class="vital-status status-normal" id="hrStatus">Normal</span>
+              </div>
+              <div class="vital-value">
+                <span class="value-num" id="hrValue">72</span>
+                <span class="value-unit">bpm</span>
+              </div>
+              <div class="vital-range">Normal: 60–100 bpm</div>
+              <div class="spark-container"><canvas id="hrChart" height="60"></canvas></div>
+            </div>
+
+            <!-- Blood Pressure -->
+            <div class="vital-card" id="bpCard">
+              <div class="vital-header">
+                <div class="vital-label">
+                  <div class="vital-icon icon-bp">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="4"/></svg>
+                  </div>
+                  <span>Blood Pressure</span>
+                </div>
+                <span class="vital-status status-normal" id="bpStatus">Normal</span>
+              </div>
+              <div class="vital-value">
+                <span class="value-num" id="bpValue">118/76</span>
+                <span class="value-unit">mmHg</span>
+              </div>
+              <div class="vital-range">Optimal: &lt;120/80 mmHg</div>
+              <div class="spark-container"><canvas id="bpChart" height="60"></canvas></div>
+            </div>
+
+            <!-- SpO2 -->
+            <div class="vital-card" id="spo2Card">
+              <div class="vital-header">
+                <div class="vital-label">
+                  <div class="vital-icon icon-spo2">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8C18.11 8 19 7.11 19 6C19 4.89 18.11 4 17 4C15.89 4 15 4.89 15 6C15 7.11 15.89 8 17 8ZM3 12H21M12 3V21"/></svg>
+                  </div>
+                  <span>SpO₂</span>
+                </div>
+                <span class="vital-status status-normal" id="spo2Status">Normal</span>
+              </div>
+              <div class="spo2-gauge-wrap">
+                <canvas id="spo2Gauge" width="120" height="120"></canvas>
+                <div class="spo2-center">
+                  <span class="value-num" id="spo2Value">98</span>
+                  <span class="value-unit">%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stress -->
+            <div class="vital-card" id="stressCard">
+              <div class="vital-header">
+                <div class="vital-label">
+                  <div class="vital-icon icon-stress">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                  </div>
+                  <span>Stress Level</span>
+                </div>
+                <span class="vital-status status-normal" id="stressStatus">Low</span>
+              </div>
+              <div class="vital-value">
+                <span class="value-num" id="stressValue">24</span>
+                <span class="value-unit">/100</span>
+              </div>
+              <div class="stress-bar-wrap">
+                <div class="stress-bar-bg">
+                  <div class="stress-bar-fill" id="stressBarFill"></div>
+                </div>
+                <div class="stress-labels"><span>Calm</span><span>Stressed</span></div>
+              </div>
+            </div>
+
+            <!-- Temperature -->
+            <div class="vital-card" id="tempCard">
+              <div class="vital-header">
+                <div class="vital-label">
+                  <div class="vital-icon icon-temp">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+                  </div>
+                  <span>Temperature</span>
+                </div>
+                <span class="vital-status status-normal" id="tempStatus">Normal</span>
+              </div>
+              <div class="vital-value">
+                <span class="value-num" id="tempValue">36.8</span>
+                <span class="value-unit">°C</span>
+              </div>
+              <div class="vital-range">Normal: 36.1–37.2 °C</div>
+              <div class="spark-container"><canvas id="tempChart" height="60"></canvas></div>
+            </div>
+
+            <!-- HRV -->
+            <div class="vital-card" id="hrvCard">
+              <div class="vital-header">
+                <div class="vital-label">
+                  <div class="vital-icon icon-hrv">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  </div>
+                  <span>HRV (RMSSD)</span>
+                </div>
+                <span class="vital-status status-good" id="hrvStatus">Good</span>
+              </div>
+              <div class="vital-value">
+                <span class="value-num" id="hrvValue">42</span>
+                <span class="value-unit">ms</span>
+              </div>
+              <div class="vital-range">Target: &gt;20ms (higher = better)</div>
+              <div class="spark-container"><canvas id="hrvChart" height="60"></canvas></div>
+            </div>
+          </div>
+
+          <!-- AI Risk Score + Trends Row -->
+          <div class="risk-trends-row">
+            <!-- AI Risk Score -->
+            <div class="risk-panel">
+              <div class="panel-header">
+                <h2>AI Risk Score</h2>
+                <div class="model-badge">LSTM + Ensemble</div>
+              </div>
+              <div class="risk-content">
+                <div class="risk-gauge-wrap">
+                  <canvas id="riskGauge" width="200" height="200"></canvas>
+                  <div class="risk-center">
+                    <div class="risk-num" id="riskScore">18</div>
+                    <div class="risk-label">LOW RISK</div>
+                  </div>
+                </div>
+                <div class="risk-breakdown">
+                  <div class="risk-item">
+                    <div class="risk-item-label">Cardiac Event</div>
+                    <div class="risk-item-bar"><div class="risk-item-fill" id="cardiacBar" style="width:12%; background: #22c55e;"></div></div>
+                    <span class="risk-pct" id="cardiacPct">12%</span>
+                  </div>
+                  <div class="risk-item">
+                    <div class="risk-item-label">Stroke Risk</div>
+                    <div class="risk-item-bar"><div class="risk-item-fill" id="strokeBar" style="width:8%; background: #22c55e;"></div></div>
+                    <span class="risk-pct" id="strokePct">8%</span>
+                  </div>
+                  <div class="risk-item">
+                    <div class="risk-item-label">Hypertension</div>
+                    <div class="risk-item-bar"><div class="risk-item-fill" id="hypertBar" style="width:22%; background: #f59e0b;"></div></div>
+                    <span class="risk-pct" id="hypertPct">22%</span>
+                  </div>
+                  <div class="risk-item">
+                    <div class="risk-item-label">Fall Risk</div>
+                    <div class="risk-item-bar"><div class="risk-item-fill" id="fallRiskBar" style="width:5%; background: #22c55e;"></div></div>
+                    <span class="risk-pct" id="fallRiskPct">5%</span>
+                  </div>
+                  <div class="risk-confidence">Confidence: <strong>93.7%</strong> · Last updated <span id="lastUpdated">just now</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 24h Trends -->
+            <div class="trends-panel">
+              <div class="panel-header">
+                <h2>24-Hour Trends</h2>
+                <div class="trend-tabs">
+                  <button class="trend-tab active" onclick="setTrendView('24h', this)">24h</button>
+                  <button class="trend-tab" onclick="setTrendView('7d', this)">7d</button>
+                  <button class="trend-tab" onclick="setTrendView('30d', this)">30d</button>
+                </div>
+              </div>
+              <div class="trends-chart-wrap"><canvas id="trendsChart"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Fall Detection + Activity Row -->
+          <div class="bottom-row">
+            <div class="fall-panel">
+              <div class="panel-header">
+                <h2>Fall Detection</h2>
+                <div class="model-badge">DSCS CNN · 99.3%</div>
+              </div>
+              <div class="fall-status">
+                <div class="fall-indicator safe" id="fallIndicator">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="28" height="28"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  <span id="fallStatusText">No Fall Detected</span>
+                </div>
+                <div class="fall-stats">
+                  <div class="fall-stat"><span class="fs-num">0</span><span class="fs-lbl">Today</span></div>
+                  <div class="fall-stat"><span class="fs-num">2</span><span class="fs-lbl">This Week</span></div>
+                  <div class="fall-stat"><span class="fs-num">99.3%</span><span class="fs-lbl">Accuracy</span></div>
+                </div>
+              </div>
+              <div class="fall-chart-wrap"><canvas id="fallChart" height="80"></canvas></div>
+            </div>
+
+            <div class="activity-panel">
+              <div class="panel-header">
+                <h2>Activity & Steps</h2>
+              </div>
+              <div class="activity-content">
+                <div class="steps-display">
+                  <div class="steps-num" id="stepsCount">6,284</div>
+                  <div class="steps-goal">of 10,000 goal</div>
+                  <div class="steps-bar-bg"><div class="steps-bar-fill" id="stepsBar" style="width:62.84%"></div></div>
+                </div>
+                <div class="activity-rings">
+                  <canvas id="activityChart" width="120" height="120"></canvas>
+                  <div class="rings-legend">
+                    <div class="rl-item"><div class="rl-dot" style="background:#6366f1"></div><span>Move</span></div>
+                    <div class="rl-item"><div class="rl-dot" style="background:#ec4899"></div><span>Exercise</span></div>
+                    <div class="rl-item"><div class="rl-dot" style="background:#06b6d4"></div><span>Stand</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="location-panel">
+              <div class="panel-header">
+                <h2>Live Location</h2>
+                <div class="gps-badge">GPS Active</div>
+              </div>
+              <div class="location-content">
+                <div class="map-placeholder" id="mapArea">
+                  <div class="map-grid"></div>
+                  <div class="map-pulse"></div>
+                  <div class="map-label">Bangalore, India</div>
+                  <div class="map-coords" id="mapCoords">12.9716° N, 77.5946° E</div>
+                </div>
+                <div class="location-meta">
+                  <div class="loc-item"><span>Accuracy</span><span>±1.5m</span></div>
+                  <div class="loc-item"><span>Speed</span><span id="locSpeed">0.2 km/h</span></div>
+                  <div class="loc-item"><span>Altitude</span><span>920m</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI INSIGHTS TAB -->
+        <div class="tab-page" id="tab-ai">
+          <div class="ai-header-banner">
+            <div class="ai-banner-text">
+              <h1>AI Health Intelligence Engine</h1>
+              <p>Powered by LSTM + XGBoost Ensemble · Edge + Cloud AI · Federated Learning Active</p>
+            </div>
+            <div class="ai-model-status">
+              <div class="model-stat"><span class="ms-num">93.7%</span><span class="ms-lbl">Confidence</span></div>
+              <div class="model-stat"><span class="ms-num">24h</span><span class="ms-lbl">Window</span></div>
+              <div class="model-stat"><span class="ms-num">847</span><span class="ms-lbl">Peers (FL)</span></div>
+            </div>
+          </div>
+
+          <div class="insights-grid">
+            <div class="insight-card" id="heartInsight">
+              <div class="insight-icon-wrap" style="background: rgba(239,68,68,0.15)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" width="28" height="28"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              </div>
+              <div class="insight-body">
+                <div class="insight-title">Cardiovascular Health</div>
+                <div class="insight-score good">Good</div>
+                <p class="insight-desc">Your heart rate variability is excellent at 42ms RMSSD. Resting HR of 62 bpm is optimal. No arrhythmia signatures detected in last 24 hours.</p>
+                <div class="insight-recs">
+                  <div class="rec-chip">✓ Continue aerobic exercise</div>
+                  <div class="rec-chip">✓ Maintain sleep schedule</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="insight-card" id="bpInsight">
+              <div class="insight-icon-wrap" style="background: rgba(251,146,60,0.15)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2" width="28" height="28"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="4"/></svg>
+              </div>
+              <div class="insight-body">
+                <div class="insight-title">Blood Pressure Trend</div>
+                <div class="insight-score watch">Monitor</div>
+                <p class="insight-desc">Cuffless BP estimation shows 118/76 mmHg average. Slight elevation detected at 14:00–16:00 (135/88). Likely stress-related — HRV correlation confirmed.</p>
+                <div class="insight-recs">
+                  <div class="rec-chip">⚠ Reduce sodium intake</div>
+                  <div class="rec-chip warning">⚠ Check BP at 18:00</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="insight-card">
+              <div class="insight-icon-wrap" style="background: rgba(99,102,241,0.15)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" width="28" height="28"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+              </div>
+              <div class="insight-body">
+                <div class="insight-title">Stress & Recovery</div>
+                <div class="insight-score good">Low Stress</div>
+                <p class="insight-desc">Stress score 24/100 — well within healthy range. Recovery score 84/100 post-sleep. Cortisol proxy (HRV + skin temp) indicates good autonomic recovery.</p>
+                <div class="insight-recs">
+                  <div class="rec-chip">✓ 7.5h sleep quality excellent</div>
+                  <div class="rec-chip">✓ 4-7-8 breathing helpful</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="insight-card">
+              <div class="insight-icon-wrap" style="background: rgba(6,182,212,0.15)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2" width="28" height="28"><path d="M17 8C18.11 8 19 7.11 19 6C19 4.89 18.11 4 17 4C15.89 4 15 4.89 15 6C15 7.11 15.89 8 17 8Z"/><path d="M12 2v20M2 12h20"/></svg>
+              </div>
+              <div class="insight-body">
+                <div class="insight-title">Oxygen Saturation</div>
+                <div class="insight-score good">Excellent</div>
+                <p class="insight-desc">SpO₂ stable at 98% throughout the day. Minimum 96% recorded during moderate activity. Nighttime dip to 95% at 03:15 — within normal range. No apnea indicators.</p>
+                <div class="insight-recs">
+                  <div class="rec-chip">✓ Respiratory health optimal</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prediction Timeline -->
+          <div class="prediction-section">
+            <div class="panel-header">
+              <h2>15-Minute Cardiac Prediction Window</h2>
+              <div class="model-badge">LSTM Early Warning</div>
+            </div>
+            <div class="prediction-timeline">
+              <div class="pred-block safe"><div class="pred-time">Now</div><div class="pred-val">18</div><div class="pred-lbl">Low</div></div>
+              <div class="pred-block safe"><div class="pred-time">+5m</div><div class="pred-val">19</div><div class="pred-lbl">Low</div></div>
+              <div class="pred-block safe"><div class="pred-time">+10m</div><div class="pred-val">21</div><div class="pred-lbl">Low</div></div>
+              <div class="pred-block safe"><div class="pred-time">+15m</div><div class="pred-val">20</div><div class="pred-lbl">Low</div></div>
+              <div class="pred-block safe"><div class="pred-time">+20m</div><div class="pred-val">22</div><div class="pred-lbl">Low</div></div>
+              <div class="pred-block safe"><div class="pred-time">+25m</div><div class="pred-val">21</div><div class="pred-lbl">Low</div></div>
+              <div class="pred-block safe"><div class="pred-time">+30m</div><div class="pred-val">23</div><div class="pred-lbl">Low</div></div>
+            </div>
+            <div class="pred-legend"><span class="pl-safe">■ Low Risk</span><span class="pl-watch">■ Watch</span><span class="pl-danger">■ High Risk</span></div>
+          </div>
+
+          <!-- Federated Learning Status -->
+          <div class="fl-panel">
+            <div class="panel-header"><h2>Federated Learning Status</h2><div class="model-badge fl-active">Active FL Round</div></div>
+            <div class="fl-grid">
+              <div class="fl-stat"><div class="fl-num">847</div><div class="fl-lbl">Participating Devices</div></div>
+              <div class="fl-stat"><div class="fl-num">Round 142</div><div class="fl-lbl">Global Model Iteration</div></div>
+              <div class="fl-stat"><div class="fl-num">CKKS</div><div class="fl-lbl">Homomorphic Encryption</div></div>
+              <div class="fl-stat"><div class="fl-num">+0.3%</div><div class="fl-lbl">Accuracy Gain (last round)</div></div>
+              <div class="fl-stat"><div class="fl-num"><0.1%</div><div class="fl-lbl">Raw Data Shared</div></div>
+              <div class="fl-stat"><div class="fl-num">DP-SGD</div><div class="fl-lbl">Differential Privacy</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EMERGENCY TAB -->
+        <div class="tab-page" id="tab-emergency">
+          <div class="emergency-header">
+            <h1>Emergency Response System</h1>
+            <p class="em-sub">3-Tier Alert Architecture · Auto-dispatch · Smart City Integration</p>
+          </div>
+
+          <div class="alert-levels">
+            <div class="alert-level level-1 active-level">
+              <div class="level-badge l1">LEVEL 1</div>
+              <div class="level-title">Mild Abnormality</div>
+              <div class="level-score">Score: 1–30</div>
+              <div class="level-triggers">
+                <div class="trigger">HR &gt; 100 or &lt; 50 bpm</div>
+                <div class="trigger">BP slightly elevated (140/90)</div>
+                <div class="trigger">SpO₂ 94–95%</div>
+                <div class="trigger">Moderate stress</div>
+              </div>
+              <div class="level-actions">
+                <div class="action">🔔 Vibration alert</div>
+                <div class="action">📱 Push notification</div>
+                <div class="action">🧘 Breathing guidance</div>
+              </div>
+            </div>
+
+            <div class="alert-level level-2">
+              <div class="level-badge l2">LEVEL 2</div>
+              <div class="level-title">Moderate Risk</div>
+              <div class="level-score">Score: 31–70</div>
+              <div class="level-triggers">
+                <div class="trigger">Arrhythmia detected</div>
+                <div class="trigger">BP &gt; 160/100 sustained</div>
+                <div class="trigger">SpO₂ 90–93%</div>
+                <div class="trigger">Fall + movement resumed</div>
+              </div>
+              <div class="level-actions">
+                <div class="action">🚨 Loud alarm + SOS</div>
+                <div class="action">📞 Auto-call contact #1</div>
+                <div class="action">📍 Live location share</div>
+                <div class="action">🏥 Notify nearest hospital</div>
+              </div>
+            </div>
+
+            <div class="alert-level level-3">
+              <div class="level-badge l3">LEVEL 3</div>
+              <div class="level-title">Critical Condition</div>
+              <div class="level-score">Score: 71–100</div>
+              <div class="level-triggers">
+                <div class="trigger">Cardiac arrest pattern</div>
+                <div class="trigger">SpO₂ &lt; 88%</div>
+                <div class="trigger">Fall + 30s motionless</div>
+                <div class="trigger">Panic button pressed</div>
+              </div>
+              <div class="level-actions">
+                <div class="action">🚑 Auto-dispatch ambulance</div>
+                <div class="action">🏥 ER digital health report</div>
+                <div class="action">👮 Alert 108 / 911</div>
+                <div class="action">🎙️ Audio recording start</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Emergency Contacts -->
+          <div class="contacts-section">
+            <div class="panel-header"><h2>Emergency Contacts</h2><button class="add-contact-btn" onclick="addContact()">+ Add Contact</button></div>
+            <div class="contacts-list" id="contactsList">
+              <div class="contact-card primary">
+                <div class="contact-priority">PRIMARY</div>
+                <div class="contact-avatar">SR</div>
+                <div class="contact-info">
+                  <div class="contact-name">Sanjay R. (Brother)</div>
+                  <div class="contact-phone">+91 98765 43210</div>
+                  <div class="contact-relation">Next of Kin</div>
+                </div>
+                <div class="contact-actions">
+                  <button class="contact-btn test" onclick="testAlert(1)">Test Alert</button>
+                  <button class="contact-btn call">Call Now</button>
+                </div>
+              </div>
+              <div class="contact-card">
+                <div class="contact-priority">SECONDARY</div>
+                <div class="contact-avatar">DR</div>
+                <div class="contact-info">
+                  <div class="contact-name">Dr. Priya Nair</div>
+                  <div class="contact-phone">+91 80 2341 5678</div>
+                  <div class="contact-relation">Cardiologist · Apollo Hospital</div>
+                </div>
+                <div class="contact-actions">
+                  <button class="contact-btn test" onclick="testAlert(2)">Test Alert</button>
+                  <button class="contact-btn call">Call Now</button>
+                </div>
+              </div>
+              <div class="contact-card">
+                <div class="contact-priority">TERTIARY</div>
+                <div class="contact-avatar">AN</div>
+                <div class="contact-info">
+                  <div class="contact-name">Anjali N. (Spouse)</div>
+                  <div class="contact-phone">+91 99001 12345</div>
+                  <div class="contact-relation">Home</div>
+                </div>
+                <div class="contact-actions">
+                  <button class="contact-btn test" onclick="testAlert(3)">Test Alert</button>
+                  <button class="contact-btn call">Call Now</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alert History -->
+          <div class="alert-history">
+            <div class="panel-header"><h2>Alert History (Last 7 Days)</h2></div>
+            <div class="alert-timeline" id="alertTimeline">
+              <div class="al-item level1"><div class="al-dot"></div><div class="al-content"><div class="al-title">Elevated HR (105 bpm)</div><div class="al-time">Today, 14:32</div><div class="al-status resolved">Auto-resolved in 4min</div></div></div>
+              <div class="al-item level1"><div class="al-dot"></div><div class="al-content"><div class="al-title">Stress Level Moderate (62/100)</div><div class="al-time">Yesterday, 10:15</div><div class="al-status resolved">Guided breathing completed</div></div></div>
+              <div class="al-item level2"><div class="al-dot warning-dot"></div><div class="al-content"><div class="al-title">BP Spike (158/102 mmHg)</div><div class="al-time">Mar 24, 09:47</div><div class="al-status acknowledged">Manually acknowledged · Dr. Nair notified</div></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SMART CITY TAB -->
+        <div class="tab-page" id="tab-smartcity">
+          <div class="smartcity-header">
+            <h1>Smart City Integration</h1>
+            <p>Bangalore Smart City Emergency Network · 12 Hospitals · 8 Ambulances Online</p>
+          </div>
+          <div class="smartcity-grid">
+            <div class="city-map-panel">
+              <div class="panel-header"><h2>Emergency Services Map</h2><div class="gps-badge">Live</div></div>
+              <div class="city-map" id="cityMap">
+                <div class="city-grid-bg"></div>
+                <!-- Hospital pins -->
+                <div class="map-pin hospital" style="left:30%;top:25%;" title="Apollo Hospital">
+                  <div class="pin-icon">🏥</div><div class="pin-label">Apollo</div>
+                </div>
+                <div class="map-pin hospital" style="left:60%;top:40%;" title="Manipal Hospital">
+                  <div class="pin-icon">🏥</div><div class="pin-label">Manipal</div>
+                </div>
+                <div class="map-pin hospital" style="left:20%;top:65%;" title="Fortis Hospital">
+                  <div class="pin-icon">🏥</div><div class="pin-label">Fortis</div>
+                </div>
+                <div class="map-pin hospital" style="left:75%;top:20%;" title="NIMHANS">
+                  <div class="pin-icon">🏥</div><div class="pin-label">NIMHANS</div>
+                </div>
+                <!-- Ambulance -->
+                <div class="map-pin ambulance" id="ambulancePin" style="left:55%;top:60%;" title="AMB-04">
+                  <div class="pin-icon">🚑</div><div class="pin-label">AMB-04</div>
+                </div>
+                <!-- Patient location (pulsing) -->
+                <div class="map-pin patient-loc" style="left:50%;top:50%;">
+                  <div class="loc-pulse-outer"></div>
+                  <div class="loc-pulse-inner"></div>
+                  <div class="pin-label you-label">YOU</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="city-status-panel">
+              <div class="panel-header"><h2>Service Status</h2></div>
+              <div class="service-list">
+                <div class="service-item online"><div class="svc-dot online-dot"></div><div class="svc-info"><div class="svc-name">108 Emergency Dispatch</div><div class="svc-meta">Connected · 234ms latency</div></div><span class="svc-stat">ONLINE</span></div>
+                <div class="service-item online"><div class="svc-dot online-dot"></div><div class="svc-info"><div class="svc-name">Apollo Hospital API</div><div class="svc-meta">Pre-arrival reports active</div></div><span class="svc-stat">ONLINE</span></div>
+                <div class="service-item online"><div class="svc-dot online-dot"></div><div class="svc-info"><div class="svc-name">Manipal Hospital API</div><div class="svc-meta">HL7 FHIR connected</div></div><span class="svc-stat">ONLINE</span></div>
+                <div class="service-item warn"><div class="svc-dot warn-dot"></div><div class="svc-info"><div class="svc-name">BBMP Traffic Integration</div><div class="svc-meta">Route optimization partial</div></div><span class="svc-stat warn-stat">DEGRADED</span></div>
+                <div class="service-item online"><div class="svc-dot online-dot"></div><div class="svc-info"><div class="svc-name">Nat. Health Mission (India)</div><div class="svc-meta">ABDM connected</div></div><span class="svc-stat">ONLINE</span></div>
+              </div>
+
+              <div class="nearest-hospitals">
+                <div class="panel-header" style="margin-top:1.5rem"><h3>Nearest Hospitals</h3></div>
+                <div class="hospital-card"><div class="hosp-name">Apollo Hospital</div><div class="hosp-meta">1.2 km · Est. ambulance: 4 min · Trauma Level I</div><button class="hosp-btn" onclick="dispatchAmbulance('Apollo')">Dispatch</button></div>
+                <div class="hospital-card"><div class="hosp-name">Manipal Hospital</div><div class="hosp-meta">2.8 km · Est. ambulance: 7 min · Cardiology ready</div><button class="hosp-btn" onclick="dispatchAmbulance('Manipal')">Dispatch</button></div>
+                <div class="hospital-card"><div class="hosp-name">Fortis Hospital</div><div class="hosp-meta">3.5 km · Est. ambulance: 9 min · ICU available</div><button class="hosp-btn disabled">Dispatch</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ANALYTICS TAB -->
+        <div class="tab-page" id="tab-analytics">
+          <div class="analytics-header">
+            <h1>Health Analytics</h1>
+            <p>Deep patterns from 24/7 monitoring · Edge AI · Cloud ML</p>
+          </div>
+          <div class="analytics-grid">
+            <div class="analytics-card full-width">
+              <div class="panel-header"><h2>Weekly Vitals Comparison</h2></div>
+              <canvas id="weeklyChart" height="80"></canvas>
+            </div>
+            <div class="analytics-card">
+              <div class="panel-header"><h2>HRV Distribution</h2></div>
+              <canvas id="hrvDistChart" height="160"></canvas>
+            </div>
+            <div class="analytics-card">
+              <div class="panel-header"><h2>Sleep Quality</h2></div>
+              <canvas id="sleepChart" height="160"></canvas>
+            </div>
+            <div class="analytics-card">
+              <div class="panel-header"><h2>Edge AI Model Stats</h2></div>
+              <div class="model-stats">
+                <div class="mstat"><div class="mstat-name">Fall Detection (DSCS CNN)</div><div class="mstat-bar"><div class="mstat-fill" style="width:99.3%"></div></div><span>99.3%</span></div>
+                <div class="mstat"><div class="mstat-name">BP Estimation (CNN-PPG)</div><div class="mstat-bar"><div class="mstat-fill" style="width:92%"></div></div><span>MAE 4.4mmHg</span></div>
+                <div class="mstat"><div class="mstat-name">Stress Detection (XGBoost)</div><div class="mstat-bar"><div class="mstat-fill" style="width:86%"></div></div><span>86%</span></div>
+                <div class="mstat"><div class="mstat-name">Cardiac Risk (LSTM+Att)</div><div class="mstat-bar"><div class="mstat-fill" style="width:92%"></div></div><span>AUC 0.92</span></div>
+              </div>
+            </div>
+            <div class="analytics-card">
+              <div class="panel-header"><h2>System Architecture</h2></div>
+              <div class="arch-layers">
+                <div class="arch-layer tier1"><div class="tier-label">TIER 1 · EDGE</div><div class="tier-items"><span>ESP32-S3</span><span>TFLite Micro</span><span>BLE 5.2</span></div></div>
+                <div class="arch-arrow">↑ MQTT/BLE ↑</div>
+                <div class="arch-layer tier2"><div class="tier-label">TIER 2 · GATEWAY</div><div class="tier-items"><span>Mobile App</span><span>Local AI</span><span>Smart City API</span></div></div>
+                <div class="arch-arrow">↑ HTTPS/5G ↑</div>
+                <div class="arch-layer tier3"><div class="tier-label">TIER 3 · CLOUD</div><div class="tier-items"><span>AWS SageMaker</span><span>IoT Core</span><span>Federated FL</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div class="tab-page" id="tab-settings">
+          <div class="settings-header"><h1>Settings & Configuration</h1></div>
+          <div class="settings-grid">
+            <div class="settings-section">
+              <h3>Medical Profile</h3>
+              <div class="form-group"><label>Full Name</label><input type="text" value="Vignesh Ramasamy" class="form-input"/></div>
+              <div class="form-row">
+                <div class="form-group"><label>Age</label><input type="number" value="34" class="form-input"/></div>
+                <div class="form-group"><label>Blood Type</label><select class="form-input"><option>B+</option><option>A+</option><option>O+</option><option>AB+</option></select></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Weight (kg)</label><input type="number" value="72" class="form-input"/></div>
+                <div class="form-group"><label>Height (cm)</label><input type="number" value="175" class="form-input"/></div>
+              </div>
+              <div class="form-group"><label>Known Conditions</label><input type="text" value="Hypertension (Stage 1)" class="form-input"/></div>
+              <div class="form-group"><label>Current Medications</label><input type="text" value="Amlodipine 5mg, Aspirin 75mg" class="form-input"/></div>
+              <div class="form-group"><label>Allergies</label><input type="text" value="Penicillin, NSAIDs" class="form-input"/></div>
+              <button class="save-btn">Save Profile</button>
+            </div>
+
+            <div class="settings-section">
+              <h3>Alert Thresholds</h3>
+              <div class="threshold-item">
+                <label>Heart Rate High (bpm) <span id="hrHighVal">100</span></label>
+                <input type="range" min="90" max="150" value="100" class="threshold-slider" oninput="document.getElementById('hrHighVal').textContent=this.value"/>
+              </div>
+              <div class="threshold-item">
+                <label>Heart Rate Low (bpm) <span id="hrLowVal">50</span></label>
+                <input type="range" min="30" max="60" value="50" class="threshold-slider" oninput="document.getElementById('hrLowVal').textContent=this.value"/>
+              </div>
+              <div class="threshold-item">
+                <label>SpO₂ Alert Below (%) <span id="spo2AlertVal">93</span></label>
+                <input type="range" min="85" max="97" value="93" class="threshold-slider" oninput="document.getElementById('spo2AlertVal').textContent=this.value"/>
+              </div>
+              <div class="threshold-item">
+                <label>AI Risk Score Alert <span id="riskAlertVal">70</span></label>
+                <input type="range" min="30" max="90" value="70" class="threshold-slider" oninput="document.getElementById('riskAlertVal').textContent=this.value"/>
+              </div>
+
+              <h3 style="margin-top:2rem">Privacy Controls</h3>
+              <div class="toggle-item"><span>Share data for Federated Learning</span><label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label></div>
+              <div class="toggle-item"><span>Allow emergency audio recording</span><label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label></div>
+              <div class="toggle-item"><span>Share anonymized health data</span><label class="toggle"><input type="checkbox" /><span class="toggle-slider"></span></label></div>
+              <div class="toggle-item"><span>Smart city location sharing</span><label class="toggle"><input type="checkbox" checked /><span class="toggle-slider"></span></label></div>
+
+              <h3 style="margin-top:2rem">Device Info</h3>
+              <div class="device-info-grid">
+                <div class="di"><span>MCU</span><span>ESP32-S3 @ 240MHz</span></div>
+                <div class="di"><span>Firmware</span><span>v2.4.1-stable</span></div>
+                <div class="di"><span>BLE</span><span>5.2 · nRF52840</span></div>
+                <div class="di"><span>GPS</span><span>u-blox NEO-M9N</span></div>
+                <div class="di"><span>Battery</span><span>500mAh LiPo · 78%</span></div>
+                <div class="di"><span>Last Sync</span><span id="lastSync">Just now</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Emergency Modal Overlay -->
+  <div class="emergency-overlay" id="emergencyOverlay" style="display:none;">
+    <div class="emergency-modal">
+      <div class="em-alert-icon">🚨</div>
+      <h2 id="emTitle">PANIC ALERT ACTIVATED</h2>
+      <p id="emDesc">Emergency contacts notified. Nearest ambulance being dispatched.</p>
+      <div class="em-countdown"><span id="emCountdown">10</span><div class="em-count-lbl">seconds until ambulance dispatch</div></div>
+      <div class="em-actions">
+        <button class="em-cancel" onclick="cancelEmergency()">Cancel (False Alarm)</button>
+        <button class="em-confirm" onclick="confirmEmergency()">Confirm Emergency</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
