@@ -168,6 +168,11 @@ function triggerAutoAlert(d) {
       : d.hr > 120 ? `Heart rate dangerously high: ${d.hr} bpm`
       : `Heart rate critically low: ${d.hr} bpm`;
     showToast('⚠ Auto-alert triggered: ' + reason, 'danger');
+    
+    // Auto-send SMS for extremely high risk
+    if (d.riskScore > 85) {
+      sendTwilioSMS(`🚨 CRITICAL RISK ALERT: AI detected ${d.riskScore}% cardiac/stroke risk. Immediate attention required. Vitals: HR=${d.hr}, BP=${d.bpSys}/${d.bpDia}.`);
+    }
   }
 }
 
@@ -208,17 +213,21 @@ function confirmEmergency() {
   emergencyTimer = null;
   document.getElementById('emergencyOverlay').style.display = 'none';
   
-  // Find nearest hospital based on simulated position
+  const user = JSON.parse(localStorage.getItem('healthguard_user_profile_data')) || { profileName: 'User', emergencyContactName: 'Emergency Contact' };
   const nearest = findNearestHospital();
   
   showToast(`🚑 Emergency Confirmed! Dispatching nearest ambulance to ${nearest.name}`, 'danger');
-  showToast(`📞 Calling emergency contact: Sanjay R.`, 'warning');
+  showToast(`📞 Calling emergency contact: ${user.emergencyContactName}`, 'warning');
   showToast(`🏥 Pre-arrival status sharing active with ${nearest.name} ER`, 'info');
 
   // Start Advanced Simulation
   startMedicalStream();
   startAmbulanceSimulation(nearest);
   updateDispatchPanel(nearest);
+
+  // Send REAL SMS via Twilio
+  const msg = `🚨 EMERGENCY ALERT: HealthGuard detected a critical event for ${user.profileName}. Location: 12.9716° N, 77.5946° E. Hospital: ${nearest.name}. Vitals: HR=${HealthData.hr}, SpO2=${HealthData.spo2.toFixed(1)}%.`;
+  sendTwilioSMS(msg);
 }
 
 // ── Medical Data Stream Simulation ──────────────────────────────
@@ -350,11 +359,148 @@ function extendTrendHistory() {
   }
 }
 
+// ── Twilio SMS Implementation ──────────────────────────────────
+async function sendTwilioSMS(message) {
+  const to = document.getElementById('twilioTo')?.value || AppConfig.defaultToNumber;
+  const statusEl = document.getElementById('smsStatus');
+  
+  if (statusEl) {
+    statusEl.textContent = 'SENDING SMS...';
+    statusEl.style.color = 'var(--accent-amber)';
+  }
+
+  try {
+    const response = await fetch(`${AppConfig.apiBaseUrl}/send-sms`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        to: to,
+        message: message
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      console.log('Backend SMS Success:', data.sid);
+      showToast('📲 Emergency SMS Sent via Relay!', 'success');
+      if (statusEl) {
+        statusEl.textContent = '✓ SMS DELIVERED';
+        statusEl.style.color = 'var(--accent-green)';
+      }
+    } else {
+      throw new Error(data.message || 'Relay Error');
+    }
+  } catch (err) {
+    console.error('Relay SMS Failed:', err);
+    let msg = err.message;
+    if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
+      msg = `Backend server not responding at ${AppConfig.apiBaseUrl}. Did you start it with 'npm start'?`;
+    }
+    showToast('❌ SMS Failed: ' + msg, 'danger');
+    if (statusEl) {
+      statusEl.textContent = '⚠ CONNECTION FAILED';
+      statusEl.style.color = 'var(--danger)';
+    }
+  }
+}
+
+function testTwilioSMS() {
+  const to = document.getElementById('twilioTo').value;
+  if (!to) {
+    showToast('Please enter a phone number first', 'warning');
+    return;
+  }
+  const user = JSON.parse(localStorage.getItem('healthguard_user_profile')) || { profileName: 'User' };
+  sendTwilioSMS(`🧪 TEST MESSAGE from HealthGuard AI for ${user.profileName}. SMS System Operational.`);
+}
+
+// ── User Profile Management ────────────────────────────────────
+function saveUserProfile() {
+  const profileFields = [
+    'profileName', 'profileAge', 'profileBlood', 'profileWeight', 
+    'profileHeight', 'profileConditions', 'profileMeds', 'profileAllergies',
+    'emergencyContactName', 'emergencyContactRelation', 'twilioTo'
+  ];
+
+  const profileData = {};
+  profileFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) profileData[id] = el.value;
+  });
+
+  localStorage.setItem('healthguard_user_profile', profileData.twilioTo); // Legacy support
+  localStorage.setItem('healthguard_user_profile_data', JSON.stringify(profileData));
+  
+  updateSidebarProfile(profileData);
+  showToast('Profile and Emergency contact updated successfully', 'success');
+}
+
+function loadUserProfile() {
+  const savedData = localStorage.getItem('healthguard_user_profile_data');
+  if (!savedData) return;
+
+  const profileData = JSON.parse(savedData);
+  Object.keys(profileData).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = profileData[id];
+  });
+
+  updateSidebarProfile(profileData);
+}
+
+function updateSidebarProfile(data) {
+  const sidebarName = document.getElementById('sidebarName');
+  const sidebarAvatar = document.getElementById('sidebarAvatar');
+  const sidebarMeta = document.getElementById('sidebarMeta');
+
+  if (sidebarName && data.profileName) {
+    // Format name to "First M." for sidebar
+    const parts = data.profileName.split(' ');
+    const display = parts.length > 1 ? `${parts[0]} ${parts[parts.length-1][0]}.` : parts[0];
+    sidebarName.textContent = display;
+    
+    // Update initials
+    const initials = parts.length > 1 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : parts[0].substring(0, 2).toUpperCase();
+    if (sidebarAvatar) sidebarAvatar.textContent = initials;
+  }
+
+  if (sidebarMeta && data.profileAge) {
+    sidebarMeta.textContent = `Age ${data.profileAge} · High Risk Profile`;
+  }
+}
+
+// ── Backend Connectivity Check ─────────────────────────────────
+async function checkBackendStatus() {
+  const statusEl = document.getElementById('smsStatus');
+  try {
+    const res = await fetch(`${AppConfig.apiBaseUrl}/health`);
+    const data = await res.json();
+    if (data.status === 'ok') {
+      console.log('✅ SMS Relay Online');
+      if (statusEl) {
+        statusEl.textContent = '● SMS RELAY ONLINE';
+        statusEl.style.color = 'var(--accent-green)';
+      }
+    }
+  } catch (err) {
+    console.warn('❌ SMS Relay Offline');
+    if (statusEl) {
+      statusEl.textContent = '○ SMS RELAY OFFLINE';
+      statusEl.style.color = 'var(--text-muted)';
+    }
+  }
+}
+
 // ── Initialization ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   extendTrendHistory();
   initAllCharts();
   updateClock();
+  loadUserProfile();
+  checkBackendStatus();
 
   // Animate step bar in on load
   setTimeout(() => {

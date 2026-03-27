@@ -79,10 +79,10 @@
 
       <div class="sidebar-footer">
         <div class="patient-card">
-          <div class="patient-avatar">VR</div>
+          <div class="patient-avatar" id="sidebarAvatar">VR</div>
           <div class="patient-info">
-            <div class="patient-name">Vignesh R.</div>
-            <div class="patient-meta">Age 34 · High Risk Profile</div>
+            <div class="patient-name" id="sidebarName">Vignesh R.</div>
+            <div class="patient-meta" id="sidebarMeta">Age 34 · High Risk Profile</div>
           </div>
           <div class="status-ring" title="Status: Active Monitoring"></div>
         </div>
@@ -717,19 +717,32 @@
           <div class="settings-grid">
             <div class="settings-section">
               <h3>Medical Profile</h3>
-              <div class="form-group"><label>Full Name</label><input type="text" value="Vignesh Ramasamy" class="form-input"/></div>
+              <div class="form-group"><label>Full Name</label><input type="text" id="profileName" value="Vignesh Ramasamy" class="form-input"/></div>
               <div class="form-row">
-                <div class="form-group"><label>Age</label><input type="number" value="34" class="form-input"/></div>
-                <div class="form-group"><label>Blood Type</label><select class="form-input"><option>B+</option><option>A+</option><option>O+</option><option>AB+</option></select></div>
+                <div class="form-group"><label>Age</label><input type="number" id="profileAge" value="34" class="form-input"/></div>
+                <div class="form-group"><label>Blood Type</label><select id="profileBlood" class="form-input"><option>B+</option><option>A+</option><option>O+</option><option>AB+</option><option>B-</option><option>A-</option><option>O-</option><option>AB-</option></select></div>
               </div>
               <div class="form-row">
-                <div class="form-group"><label>Weight (kg)</label><input type="number" value="72" class="form-input"/></div>
-                <div class="form-group"><label>Height (cm)</label><input type="number" value="175" class="form-input"/></div>
+                <div class="form-group"><label>Weight (kg)</label><input type="number" id="profileWeight" value="72" class="form-input"/></div>
+                <div class="form-group"><label>Height (cm)</label><input type="number" id="profileHeight" value="175" class="form-input"/></div>
               </div>
-              <div class="form-group"><label>Known Conditions</label><input type="text" value="Hypertension (Stage 1)" class="form-input"/></div>
-              <div class="form-group"><label>Current Medications</label><input type="text" value="Amlodipine 5mg, Aspirin 75mg" class="form-input"/></div>
-              <div class="form-group"><label>Allergies</label><input type="text" value="Penicillin, NSAIDs" class="form-input"/></div>
-              <button class="save-btn">Save Profile</button>
+              <div class="form-group"><label>Known Conditions</label><input type="text" id="profileConditions" value="Hypertension (Stage 1)" class="form-input"/></div>
+              <div class="form-group"><label>Current Medications</label><input type="text" id="profileMeds" value="Amlodipine 5mg, Aspirin 75mg" class="form-input"/></div>
+              <div class="form-group"><label>Allergies</label><input type="text" id="profileAllergies" value="Penicillin, NSAIDs" class="form-input"/></div>
+              
+              <h3 style="margin-top:2rem">Primary Emergency Contact</h3>
+              <div class="form-group"><label>Contact Name</label><input type="text" id="emergencyContactName" placeholder="Sanjay R." class="form-input"/></div>
+              <div class="form-group"><label>Relationship</label><input type="text" id="emergencyContactRelation" placeholder="Brother / Next of Kin" class="form-input"/></div>
+              <div class="form-group">
+                <label>Emergency Contact Number</label>
+                <input type="text" id="twilioTo" class="form-input" placeholder="+1234567890">
+              </div>
+              
+              <div class="form-row" style="margin-top: 1.5rem;">
+                <button class="save-btn" onclick="saveUserProfile()">Update Profile</button>
+                <button class="save-btn" style="background: rgba(99,102,241,0.2); color: var(--accent); border: 1px solid var(--border-bright);" onclick="testTwilioSMS()">TEST SMS</button>
+              </div>
+              <div id="smsStatus" style="font-size: 0.65rem; margin-top: 10px; font-weight: 700;"></div>
             </div>
 
             <div class="settings-section">
@@ -790,6 +803,7 @@
   <!-- Notification Toast -->
   <div class="toast-container" id="toastContainer"></div>
 
+  <script src="js/config.js"></script>
   <script src="js/data.js"></script>
   <script src="js/charts.js"></script>
   <script src="js/app.js"></script>
