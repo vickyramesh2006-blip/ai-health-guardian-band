@@ -10,9 +10,14 @@ def load_env():
     if os.path.exists(env_path):
         with open(env_path) as f:
             for line in f:
-                if line.strip() and not line.startswith('#'):
-                    key, value = line.strip().split('=', 1)
-                    os.environ[key] = value
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    if '=' in line:
+                        key, value = line.split('=', 1)
+                        # Strip whitespace and common quotes
+                        key = key.strip()
+                        value = value.strip().strip('"').strip("'")
+                        os.environ[key] = value
 
 load_env()
 
