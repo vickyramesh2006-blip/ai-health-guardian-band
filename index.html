@@ -473,12 +473,13 @@
           </div>
 
           <div class="alert-levels">
+            <!-- Level 1 -->
             <div class="alert-level level-1 active-level">
               <div class="level-badge l1">LEVEL 1</div>
               <div class="level-title">Mild Abnormality</div>
               <div class="level-score">Score: 1–30</div>
               <div class="level-triggers">
-                <div class="trigger">HR &gt; 100 or &lt; 50 bpm</div>
+                <div class="trigger">HR > 100 or < 50 bpm</div>
                 <div class="trigger">BP slightly elevated (140/90)</div>
                 <div class="trigger">SpO₂ 94–95%</div>
                 <div class="trigger">Moderate stress</div>
@@ -490,13 +491,14 @@
               </div>
             </div>
 
+            <!-- Level 2 -->
             <div class="alert-level level-2">
               <div class="level-badge l2">LEVEL 2</div>
               <div class="level-title">Moderate Risk</div>
               <div class="level-score">Score: 31–70</div>
               <div class="level-triggers">
                 <div class="trigger">Arrhythmia detected</div>
-                <div class="trigger">BP &gt; 160/100 sustained</div>
+                <div class="trigger">BP > 160/100 sustained</div>
                 <div class="trigger">SpO₂ 90–93%</div>
                 <div class="trigger">Fall + movement resumed</div>
               </div>
@@ -508,13 +510,14 @@
               </div>
             </div>
 
+            <!-- Level 3 -->
             <div class="alert-level level-3">
               <div class="level-badge l3">LEVEL 3</div>
               <div class="level-title">Critical Condition</div>
               <div class="level-score">Score: 71–100</div>
               <div class="level-triggers">
                 <div class="trigger">Cardiac arrest pattern</div>
-                <div class="trigger">SpO₂ &lt; 88%</div>
+                <div class="trigger">SpO₂ < 88%</div>
                 <div class="trigger">Fall + 30s motionless</div>
                 <div class="trigger">Panic button pressed</div>
               </div>
@@ -527,47 +530,51 @@
             </div>
           </div>
 
-          <!-- Emergency Contacts -->
-          <div class="contacts-section">
-            <div class="panel-header"><h2>Emergency Contacts</h2><button class="add-contact-btn" onclick="addContact()">+ Add Contact</button></div>
-            <div class="contacts-list" id="contactsList">
-              <div class="contact-card primary">
-                <div class="contact-priority">PRIMARY</div>
-                <div class="contact-avatar">SR</div>
-                <div class="contact-info">
-                  <div class="contact-name">Sanjay R. (Brother)</div>
-                  <div class="contact-phone">+91 98765 43210</div>
-                  <div class="contact-relation">Next of Kin</div>
-                </div>
-                <div class="contact-actions">
-                  <button class="contact-btn test" onclick="testAlert(1)">Test Alert</button>
-                  <button class="contact-btn call">Call Now</button>
+          <!-- Emergency Dashboard Grid -->
+          <div class="emergency-grid">
+            <div class="glass-card em-status-card">
+              <div class="card-header">
+                <h3>Medical Data Stream</h3>
+                <div class="pulse-indicator" id="streamIndicator"></div>
+              </div>
+              <div class="data-stream-container">
+                <div id="dataStreamFeed" class="mono-text">
+                  <div class="stream-line system">> System: Awaiting trigger...</div>
                 </div>
               </div>
-              <div class="contact-card">
-                <div class="contact-priority">SECONDARY</div>
-                <div class="contact-avatar">DR</div>
-                <div class="contact-info">
-                  <div class="contact-name">Dr. Priya Nair</div>
-                  <div class="contact-phone">+91 80 2341 5678</div>
-                  <div class="contact-relation">Cardiologist · Apollo Hospital</div>
-                </div>
-                <div class="contact-actions">
-                  <button class="contact-btn test" onclick="testAlert(2)">Test Alert</button>
-                  <button class="contact-btn call">Call Now</button>
-                </div>
+            </div>
+
+            <div class="glass-card em-contacts-card">
+              <div class="panel-header">
+                <h2>Emergency Contacts</h2>
+                <button class="add-contact-btn" onclick="addContact()">+ Add Contact</button>
               </div>
-              <div class="contact-card">
-                <div class="contact-priority">TERTIARY</div>
-                <div class="contact-avatar">AN</div>
-                <div class="contact-info">
-                  <div class="contact-name">Anjali N. (Spouse)</div>
-                  <div class="contact-phone">+91 99001 12345</div>
-                  <div class="contact-relation">Home</div>
+              <div class="contacts-list" id="contactsList">
+                <div class="contact-card primary">
+                  <div class="contact-priority">PRIMARY</div>
+                  <div class="contact-avatar">SR</div>
+                  <div class="contact-info">
+                    <div class="contact-name">Sanjay R. (Brother)</div>
+                    <div class="contact-phone">+91 98765 43210</div>
+                    <div class="contact-relation">Next of Kin</div>
+                  </div>
+                  <div class="contact-actions">
+                    <button class="contact-btn test" onclick="testAlert(1)">Test Alert</button>
+                    <button class="contact-btn call">Call Now</button>
+                  </div>
                 </div>
-                <div class="contact-actions">
-                  <button class="contact-btn test" onclick="testAlert(3)">Test Alert</button>
-                  <button class="contact-btn call">Call Now</button>
+                <div class="contact-card">
+                  <div class="contact-priority">SECONDARY</div>
+                  <div class="contact-avatar">DR</div>
+                  <div class="contact-info">
+                    <div class="contact-name">Dr. Priya Nair</div>
+                    <div class="contact-phone">+91 80 2341 5678</div>
+                    <div class="contact-relation">Cardiologist · Apollo Hospital</div>
+                  </div>
+                  <div class="contact-actions">
+                    <button class="contact-btn test" onclick="testAlert(2)">Test Alert</button>
+                    <button class="contact-btn call">Call Now</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -579,7 +586,6 @@
             <div class="alert-timeline" id="alertTimeline">
               <div class="al-item level1"><div class="al-dot"></div><div class="al-content"><div class="al-title">Elevated HR (105 bpm)</div><div class="al-time">Today, 14:32</div><div class="al-status resolved">Auto-resolved in 4min</div></div></div>
               <div class="al-item level1"><div class="al-dot"></div><div class="al-content"><div class="al-title">Stress Level Moderate (62/100)</div><div class="al-time">Yesterday, 10:15</div><div class="al-status resolved">Guided breathing completed</div></div></div>
-              <div class="al-item level2"><div class="al-dot warning-dot"></div><div class="al-content"><div class="al-title">BP Spike (158/102 mmHg)</div><div class="al-time">Mar 24, 09:47</div><div class="al-status acknowledged">Manually acknowledged · Dr. Nair notified</div></div></div>
             </div>
           </div>
         </div>
@@ -592,28 +598,35 @@
           </div>
           <div class="smartcity-grid">
             <div class="city-map-panel">
-              <div class="panel-header"><h2>Emergency Services Map</h2><div class="gps-badge">Live</div></div>
-              <div class="city-map" id="cityMap">
+              <div class="panel-header">
+                <h2>Emergency Services Map</h2>
+                <div class="map-legend">
+                  <span class="legend-item"><i class="dot hospital"></i> Hospital</span>
+                  <span class="legend-item"><i class="dot ambulance"></i> Ambulance</span>
+                </div>
+              </div>
+              <div class="city-map" id="mapMain">
                 <div class="city-grid-bg"></div>
+                <svg id="routePath" class="map-route-svg"></svg>
+                
                 <!-- Hospital pins -->
-                <div class="map-pin hospital" style="left:30%;top:25%;" title="Apollo Hospital">
+                <div class="map-pin hospital" style="left:30%;top:25%;" id="hosp-apollo">
                   <div class="pin-icon">🏥</div><div class="pin-label">Apollo</div>
                 </div>
-                <div class="map-pin hospital" style="left:60%;top:40%;" title="Manipal Hospital">
+                <div class="map-pin hospital" style="left:60%;top:40%;" id="hosp-manipal">
                   <div class="pin-icon">🏥</div><div class="pin-label">Manipal</div>
                 </div>
-                <div class="map-pin hospital" style="left:20%;top:65%;" title="Fortis Hospital">
+                <div class="map-pin hospital" style="left:20%;top:65%;" id="hosp-fortis">
                   <div class="pin-icon">🏥</div><div class="pin-label">Fortis</div>
                 </div>
-                <div class="map-pin hospital" style="left:75%;top:20%;" title="NIMHANS">
-                  <div class="pin-icon">🏥</div><div class="pin-label">NIMHANS</div>
+                
+                <!-- Ambulance marker -->
+                <div class="map-pin ambulance-marker" id="ambulanceMarker" style="left:55%;top:60%;">
+                  <div class="pin-icon">🚑</div>
                 </div>
-                <!-- Ambulance -->
-                <div class="map-pin ambulance" id="ambulancePin" style="left:55%;top:60%;" title="AMB-04">
-                  <div class="pin-icon">🚑</div><div class="pin-label">AMB-04</div>
-                </div>
+
                 <!-- Patient location (pulsing) -->
-                <div class="map-pin patient-loc" style="left:50%;top:50%;">
+                <div class="map-pin patient-loc" style="left:50%;top:50%;" id="patientPin">
                   <div class="loc-pulse-outer"></div>
                   <div class="loc-pulse-inner"></div>
                   <div class="pin-label you-label">YOU</div>
@@ -622,20 +635,36 @@
             </div>
 
             <div class="city-status-panel">
-              <div class="panel-header"><h2>Service Status</h2></div>
+              <div class="glass-card dispatch-panel">
+                <div class="card-header">
+                  <h3>Nearest Facility Dispatch</h3>
+                  <span class="status-badge" id="dispatchStatus">IDLE</span>
+                </div>
+                <div class="dispatch-details">
+                  <div class="dispatch-item">
+                    <span class="label">Primary Hospital</span>
+                    <span class="value" id="nearHospital">--</span>
+                  </div>
+                  <div class="dispatch-item">
+                    <span class="label">Distance / ETA</span>
+                    <span class="value" id="nearDist">--</span>
+                  </div>
+                  <div class="dispatch-item">
+                    <span class="label">Optimization</span>
+                    <span class="value status-good" id="routeOpt">Ready</span>
+                  </div>
+                </div>
+                <div class="dispatch-actions">
+                  <button class="btn-dispatch" onclick="dispatchAmbulance('Nearest')">
+                    DISPATCH AMBULANCE
+                  </button>
+                </div>
+              </div>
+
               <div class="service-list">
                 <div class="service-item online"><div class="svc-dot online-dot"></div><div class="svc-info"><div class="svc-name">108 Emergency Dispatch</div><div class="svc-meta">Connected · 234ms latency</div></div><span class="svc-stat">ONLINE</span></div>
                 <div class="service-item online"><div class="svc-dot online-dot"></div><div class="svc-info"><div class="svc-name">Apollo Hospital API</div><div class="svc-meta">Pre-arrival reports active</div></div><span class="svc-stat">ONLINE</span></div>
-                <div class="service-item online"><div class="svc-dot online-dot"></div><div class="svc-info"><div class="svc-name">Manipal Hospital API</div><div class="svc-meta">HL7 FHIR connected</div></div><span class="svc-stat">ONLINE</span></div>
                 <div class="service-item warn"><div class="svc-dot warn-dot"></div><div class="svc-info"><div class="svc-name">BBMP Traffic Integration</div><div class="svc-meta">Route optimization partial</div></div><span class="svc-stat warn-stat">DEGRADED</span></div>
-                <div class="service-item online"><div class="svc-dot online-dot"></div><div class="svc-info"><div class="svc-name">Nat. Health Mission (India)</div><div class="svc-meta">ABDM connected</div></div><span class="svc-stat">ONLINE</span></div>
-              </div>
-
-              <div class="nearest-hospitals">
-                <div class="panel-header" style="margin-top:1.5rem"><h3>Nearest Hospitals</h3></div>
-                <div class="hospital-card"><div class="hosp-name">Apollo Hospital</div><div class="hosp-meta">1.2 km · Est. ambulance: 4 min · Trauma Level I</div><button class="hosp-btn" onclick="dispatchAmbulance('Apollo')">Dispatch</button></div>
-                <div class="hospital-card"><div class="hosp-name">Manipal Hospital</div><div class="hosp-meta">2.8 km · Est. ambulance: 7 min · Cardiology ready</div><button class="hosp-btn" onclick="dispatchAmbulance('Manipal')">Dispatch</button></div>
-                <div class="hospital-card"><div class="hosp-name">Fortis Hospital</div><div class="hosp-meta">3.5 km · Est. ambulance: 9 min · ICU available</div><button class="hosp-btn disabled">Dispatch</button></div>
               </div>
             </div>
           </div>

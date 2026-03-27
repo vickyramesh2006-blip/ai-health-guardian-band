@@ -207,22 +207,118 @@ function confirmEmergency() {
   clearInterval(countdownTimer);
   emergencyTimer = null;
   document.getElementById('emergencyOverlay').style.display = 'none';
-  showToast('🚑 Ambulance dispatched! ETA: 4 minutes to Apollo Hospital', 'danger');
-  showToast('📞 Calling emergency contact: Sanjay R.', 'warning');
-  showToast('🏥 Pre-arrival report sent to Apollo ER', 'info');
+  
+  // Find nearest hospital based on simulated position
+  const nearest = findNearestHospital();
+  
+  showToast(`🚑 Emergency Confirmed! Dispatching nearest ambulance to ${nearest.name}`, 'danger');
+  showToast(`📞 Calling emergency contact: Sanjay R.`, 'warning');
+  showToast(`🏥 Pre-arrival status sharing active with ${nearest.name} ER`, 'info');
+
+  // Start Advanced Simulation
+  startMedicalStream();
+  startAmbulanceSimulation(nearest);
+  updateDispatchPanel(nearest);
 }
 
-function testAlert(contactNum) {
-  showToast(`Test alert sent to Contact #${contactNum} — SMS & push notification delivered`, 'success');
+// ── Medical Data Stream Simulation ──────────────────────────────
+let streamInterval = null;
+function startMedicalStream() {
+  const feed = document.getElementById('dataStreamFeed');
+  const indicator = document.getElementById('streamIndicator');
+  if (!feed || !indicator) return;
+
+  indicator.classList.add('active');
+  feed.innerHTML = '<div class="stream-line system">> Initializing secure HL7 FHIR link...</div>';
+  
+  if (streamInterval) clearInterval(streamInterval);
+  
+  const addLine = (txt, cls) => {
+    const line = document.createElement('div');
+    line.className = 'stream-line ' + cls;
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${txt}`;
+    feed.appendChild(line);
+    feed.scrollTop = feed.scrollHeight;
+  };
+
+  setTimeout(() => addLine('> Connection established: Apollo/Manipal HIE Gateway', 'system'), 1000);
+  setTimeout(() => addLine('> Streaming live telemetry (encrypted AES-256)', 'system'), 2000);
+
+  streamInterval = setInterval(() => {
+    const d = HealthData; // Global from data.js
+    addLine(`DATA: HR=${d.hr} BP=${d.bpSys}/${d.bpDia} SpO2=${d.spo2.toFixed(1)}% Stress=${d.stress}`, 'data');
+    
+    if (d.hr > 110 || d.spo2 < 92) {
+      addLine(`ALERT: Vitals threshold exceeded! ER notified.`, 'alert');
+    }
+  }, 3000);
 }
 
-function addContact() {
-  showToast('Opening emergency contacts editor...', 'info');
+// ── Nearest Hospital & Ambulance Logic ──────────────────────────
+const HOSPITALS = [
+  { id: 'apollo', name: 'Apollo Hospital', x: 30, y: 25, dist: 1.2 },
+  { id: 'manipal', name: 'Manipal Hospital', x: 60, y: 40, dist: 2.8 },
+  { id: 'fortis', name: 'Fortis Hospital', x: 20, y: 65, dist: 3.5 }
+];
+
+function findNearestHospital() {
+  // Simple distance from patient (at 50,50)
+  return HOSPITALS.reduce((prev, curr) => {
+    const d1 = Math.sqrt(Math.pow(50 - prev.x, 2) + Math.pow(50 - prev.y, 2));
+    const d2 = Math.sqrt(Math.pow(50 - curr.x, 2) + Math.pow(50 - curr.y, 2));
+    return d1 < d2 ? prev : curr;
+  });
+}
+
+function updateDispatchPanel(hosp) {
+  setText('nearHospital', hosp.name);
+  setText('nearDist', `${hosp.dist} km · ~4 min`);
+  const status = document.getElementById('dispatchStatus');
+  if (status) {
+    status.textContent = 'EN-ROUTE';
+    status.classList.add('active');
+  }
+}
+
+function startAmbulanceSimulation(hosp) {
+  const ambMarker = document.getElementById('ambulanceMarker');
+  const routePath = document.getElementById('routePath');
+  if (!ambMarker || !routePath) return;
+
+  // Create SVG path for route
+  const startX = 55, startY = 60; // Ambulance start
+  const endX = 50, endY = 50;   // Patient location
+  const hospX = hosp.x, hospY = hosp.y;
+
+  // Draw simple path: Amb -> Patient -> Hospital
+  routePath.innerHTML = `
+    <path class="map-route-line" id="activeRouteLine" d="M ${startX}% ${startY}% L ${endX}% ${endY}% L ${hospX}% ${hospY}%" style="opacity:1"/>
+  `;
+
+  // Move ambulance to patient
+  setTimeout(() => {
+    ambMarker.style.left = '50%';
+    ambMarker.style.top = '50%';
+    showToast('🚑 Ambulance has arrived at your location', 'success');
+    
+    // Move to hospital after 5s
+    setTimeout(() => {
+      ambMarker.style.left = hosp.x + '%';
+      ambMarker.style.top = hosp.y + '%';
+      showToast(`🚑 En-route to ${hosp.name}`, 'info');
+    }, 5000);
+  }, 2000);
 }
 
 function dispatchAmbulance(hospital) {
-  showToast(`🚑 Requesting ALS ambulance to ${hospital} Hospital — dispatching now`, 'warning');
-  setTimeout(() => showToast(`✓ AMB-04 assigned · ETA: 6 min · Route optimized via BBMP`, 'success'), 2000);
+  if (hospital === 'Nearest') {
+    confirmEmergency();
+    return;
+  }
+  const hosp = HOSPITALS.find(h => h.name.includes(hospital)) || HOSPITALS[0];
+  showToast(`🚑 Manual Dispatch: Requesting ambulance for ${hosp.name}`, 'warning');
+  startAmbulanceSimulation(hosp);
+  updateDispatchPanel(hosp);
 }
 
 // ── Toast Notifications ────────────────────────────────────────
