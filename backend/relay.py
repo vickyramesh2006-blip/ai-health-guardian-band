@@ -4,22 +4,26 @@ import os
 import requests
 from urllib.parse import urlparse
 
-# Simple function to load .env file
-def load_env():
-    env_path = os.path.join(os.path.dirname(__file__), '.env')
-    if os.path.exists(env_path):
-        with open(env_path) as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith('#'):
-                    if '=' in line:
-                        key, value = line.split('=', 1)
-                        # Strip whitespace and common quotes
-                        key = key.strip()
-                        value = value.strip().strip('"').strip("'")
-                        os.environ[key] = value
-
-load_env()
+# Try to use python-dotenv, fallback to manual loader if missing
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("✅ Loaded environment via python-dotenv")
+except ImportError:
+    # Manual fallback for zero-dependency environments
+    def load_env():
+        env_path = os.path.join(os.path.dirname(__file__), '.env')
+        if os.path.exists(env_path):
+            with open(env_path) as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#'):
+                        if '=' in line:
+                            key, value = line.split('=', 1)
+                            key, value = key.strip(), value.strip().strip('"').strip("'")
+                            os.environ[key] = value
+    load_env()
+    print("⚠️  python-dotenv not found, using manual fallback loader")
 
 class TwilioRelayHandler(http.server.BaseHTTPRequestHandler):
     def _set_headers(self, status=200):
