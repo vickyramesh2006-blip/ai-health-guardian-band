@@ -1,0 +1,19 @@
+# Environment Secrets
+.env
+backend/.env
+frontend/.env
+*.env.local
+*.env.*.local
+
+# Dependency folders
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# OS/IDE files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.log
